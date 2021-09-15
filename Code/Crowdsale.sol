@@ -16,6 +16,9 @@ contract PupperCoinSale is Crowdsale,
 
     constructor(
         // @TODO: Fill in the constructor parameters!
+        uint rate,
+        address payable wallet,
+        PupperCoin token
     )
         // @TODO: Pass the constructor parameters to the crowdsale contracts.
         public
