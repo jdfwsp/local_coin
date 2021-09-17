@@ -1,30 +1,30 @@
 pragma solidity ^0.5.0;
 
-import "./PupperCoin.sol";
+import "./LocalCoin.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v2.5.0/contracts/crowdsale/Crowdsale.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v2.5.0/contracts/crowdsale/emission/MintedCrowdsale.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v2.5.0/contracts/crowdsale/validation/CappedCrowdsale.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v2.5.0/contracts/crowdsale/validation/TimedCrowdsale.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v2.5.0/contracts/crowdsale/distribution/RefundablePostDeliveryCrowdsale.sol";
 
-// @TODO: Inherit the crowdsale contracts
-contract PupperCoinSale is Crowdsale, 
+contract LocalCoinSale is Crowdsale, 
     MintedCrowdsale,
     CappedCrowdsale,
     TimedCrowdsale,
     RefundablePostDeliveryCrowdsale {
 
     constructor(
-        // @TODO: Fill in the constructor parameters!
         uint rate,
         address payable wallet,
-        PupperCoin token,
-        uint goal,
+        LocalCoin token,
+        uint cap,
         uint openingTime,
-        uint closingTime
+        uint closingTime,
+        uint goal
+        
     )
-        // @TODO: Pass the constructor parameters to the crowdsale contracts.
         Crowdsale(rate, wallet, token)
+        CappedCrowdsale(cap)
         TimedCrowdsale(openingTime, closingTime)
         RefundableCrowdsale(goal)
         
@@ -34,32 +34,27 @@ contract PupperCoinSale is Crowdsale,
     }
 }
 
-contract PupperCoinSaleDeployer {
+contract LocalCoinSaleDeployer {
 
-    address public token_sale_address;
+    address public local_sale_address;
     address public token_address;
 
     constructor(
-        // @TODO: Fill in the constructor parameters!
         string memory name,
         string memory symbol,
         address payable wallet
     )
         public
     {
-        // @TODO: create the PupperCoin and keep its address handy
-		PupperCoin token = new PupperCoin(name, symbol, 0);
+		LocalCoin token = new LocalCoin(name, symbol, 0);
 		token_address = address(token);
-        // @TODO: create the PupperCoinSale and tell it about the token, set the goal, and set the open and close times to now and now + 24 weeks.
-        PupperCoinSale pupper_sale = new PupperCoinSale(1, wallet, token);
-        pupper_sale_address = address(pupper_sale);
-        goal = 300;
-        openingTime = now;
-        closingTime = now + 24 weeks;
-        
+		
+        LocalCoinSale Local_sale = new LocalCoinSale(1, wallet, token, 300e18, now, (now + 24 weeks), 300e18);
+        local_sale_address = address(Local_sale);
 
-        // make the PupperCoinSale contract a minter, then have the PupperCoinSaleDeployer renounce its minter role
-        token.addMinter(token_sale_address);
+        token.addMinter(local_sale_address);
         token.renounceMinter();
     }
 }
+
+// https://ropsten.etherscan.io/address/0xbcbb960f7428b6fd3cd07ff26561f37d82339f11
